@@ -50,6 +50,7 @@ public class SecurityModel implements PageModel {
     private String selectedContainersSecurityNamespace = "all";
     private String selectedServiceAccountsNamespace = "all";
     private String selectedPodSecurityPoliciesNamespace = "all";
+    private String selectedNetworkPoliciesNamespace = "all";
 
     private List<String> namespaces = new ArrayList<>();
     private Map<Integer, RoleResult> rolesResults = new HashMap<>();
@@ -201,6 +202,15 @@ public class SecurityModel implements PageModel {
 
     public SecurityModel setSelectedRBACsNamespace(String selectedRBACsNamespace) {
         this.selectedRBACsNamespace = selectedRBACsNamespace;
+        return this;
+    }
+
+    public String getSelectedNetworkPoliciesNamespace() {
+        return selectedNetworkPoliciesNamespace;
+    }
+
+    public SecurityModel setSelectedNetworkPoliciesNamespace(String selectedNetworkPoliciesNamespace) {
+        this.selectedNetworkPoliciesNamespace = selectedNetworkPoliciesNamespace;
         return this;
     }
 

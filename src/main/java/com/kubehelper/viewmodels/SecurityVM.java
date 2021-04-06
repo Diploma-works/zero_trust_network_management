@@ -430,6 +430,15 @@ public class SecurityVM {
         }
     }
 
+    /**
+     * Clears all model items that belongs to NetworkPolicies.
+     */
+    @Command
+    @NotifyChange()
+    public void clearAllNetworkPolicies() {
+
+    }
+
     //  FULL DEFINITION / LOGIC ================
 
     /**
@@ -651,6 +660,13 @@ public class SecurityVM {
         this.model.setSelectedPodSecurityPoliciesNamespace(selectedPodSecurityPoliciesNamespace);
     }
 
+    public String getSelectedNetworkPoliciesNamespace() {
+        return model.getSelectedNetworkPoliciesNamespace();
+    }
+
+    public void setSelectedNetworkPoliciesNamespace(String selectedPodSecurityPoliciesNamespace) {
+        this.model.setSelectedNetworkPoliciesNamespace(selectedPodSecurityPoliciesNamespace);
+    }
 
     //  TOTAL ITEMS ================
 

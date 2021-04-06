@@ -9,6 +9,7 @@
                     <tab label="Container Security Contexts"/>
                     <tab label="Service Accounts"/>
                     <tab label="Pod Security Policies"/>
+                    <tab label="Network Policies"/>
                 </tabs>
                 <tabpanels>
 
@@ -717,6 +718,156 @@
                         </groupbox>
                     </tabpanel>
 
+                    <!--                         NETWORK POLICIES-->
+                    <tabpanel>
+                        <groupbox width="100%" closable="false" height="100%">
+                            <caption iconSclass="z-icon-sliders" label="Search configuration"/>
+                            <vbox height="100%" width="100%">
+                                <hbox id="menuHboxNetworkPolicies" height="100%" width="100%" align="stretch">
+                                    <cell id="clearAllCellNetworkPolicies" width="10%" tooltip="clearAllTooltip">
+                                        <button id="clearAllBtnNetworkPolicies" width="100%" iconSclass="z-icon-eraser" label="Clear all" onClick="@command('clearAllNetworkPolicies')"/>
+                                    </cell>
+                                    <separator width="15px" orient="vertical" bar="true"/>
+                                    <cell id="namespacesCellNetworkPolicies" width="20%" align="left">
+                                        <hlayout valign="middle">
+                                            <label value="Namespace: "/>
+                                            <combobox id="namespacesCBoxNetworkPolicies" tooltip="namespacesTooltip" hflex="1" model="@load(securityVM.namespaces)"
+                                                      selectedItem="@bind(securityVM.selectedNetworkPoliciesNamespace)" readonly="true">
+                                                <template name="model">
+                                                    <comboitem label="@load(each)"/>
+                                                </template>
+                                            </combobox>
+                                        </hlayout>
+                                    </cell>
+                                    <cell width="59%">
+                                    </cell>
+                                    <cell id="cellGetBtnNetworkPolicies" width="10%">
+                                        <button id="getNetworkPoliciesBtn" label="Search" iconSclass="z-icon-search" onClick="@command('getNetworkPolices')" width="100%"/>
+                                    </cell>
+                                </hbox>
+                                <separator width="100%" orient="horizontal" bar="false"/>
+                            </vbox>
+                        </groupbox>
+                        <groupbox id="networkPoliciesGrBox" width="100%" closable="false" height="@load(securityVM.rolesGridGrBoxHeight)">
+                            <caption iconSclass="fas fa-list" label="Results"/>
+                            <vbox height="100%" width="100%">
+                                <grid id="securityNetworkPoliciesGrid" model="@load(securityVM.rolesResults)" height="@load(securityVM.rolesGridHeight)">
+                                    <auxhead id="networkPoliciesGridAuxHead">
+                                        <auxheader>
+                                            <span sclass="z-icon-hashtag"/>
+                                        </auxheader>
+                                        <auxheader colspan="1">
+                                            <combobox id="filterNetworkPoliciesResourceNamesCBox" hflex="1" mold="rounded" model="@load(securityVM.rolesFilter.resourceNamesFilter)"
+                                                      selectedItem="@bind(securityVM.rolesFilter.selectedResourceNameFilter)"
+                                                      onChange="@command('filterSecurityRoles')">
+                                                <template name="model">
+                                                    <comboitem label="@load(each)"/>
+                                                </template>
+                                            </combobox>
+                                        </auxheader>
+                                        <auxheader colspan="1">
+                                            <combobox id="filterNetworkPoliciesNamespacesCBox" hflex="1" mold="rounded" model="@load(securityVM.rolesFilter.namespacesFilter)"
+                                                      selectedItem="@bind(securityVM.rolesFilter.selectedNamespaceFilter)"
+                                                      onChange="@command('filterSecurityRoles')">
+                                                <template name="model">
+                                                    <comboitem label="@load(each)"/>
+                                                </template>
+                                            </combobox>
+                                        </auxheader>
+                                        <auxheader colspan="1">
+                                            <combobox id="filterNetworkPoliciesResourceTypesCBox" hflex="1" model="@load(securityVM.rolesFilter.resourceTypesFilter)"
+                                                      selectedItem="@bind(securityVM.rolesFilter.selectedResourceTypeFilter)"
+                                                      onChange="@command('filterSecurityRoles')">
+                                                <template name="model">
+                                                    <comboitem label="@load(each)"/>
+                                                </template>
+                                            </combobox>
+                                        </auxheader>
+                                        <auxheader colspan="1">
+                                            <textbox instant="true" hflex="1" value="@bind(securityVM.rolesFilter.creationTime)" onChange="@command('filterSecurityRoles')"/>
+                                        </auxheader>
+                                        <auxheader class="fullDefinitionIdHeader">
+                                            <span sclass="z-icon-file-text"/>
+                                        </auxheader>
+                                    </auxhead>
+                                    <columns menupopup="auto" sizable="true">
+                                        <column hflex="min" label="Id" sort="auto(id)"/>
+                                        <column hflex="3" label="Role Name" sort="auto(resourceName)"/>
+                                        <column hflex="2" label="Namespace" sort="auto(namespace)"/>
+                                        <column hflex="1" label="Kind" sort="auto(resourceType)"/>
+                                        <column hflex="min" label="Creation Time" sort="auto(creationTime)"/>
+                                        <column hflex="min" label="Raws"/>
+                                    </columns>
+                                    <rows>
+                                        <template name="model" var="item">
+                                            <row onClick="@command('showRoleRules', clickedItem=item)" style="cursor:pointer">
+                                                <label value="${item.id}"/>
+                                                <label value="${item.resourceName}"/>
+                                                <label value="${item.namespace}"/>
+                                                <label value="${item.resourceType}"/>
+                                                <label value="${item.creationTime}"/>
+                                                <toolbarbutton label="Raw/Yaml/Json" onClick="@command('showRoleFullDefinition', item=item)" hflex="1"/>
+                                            </row>
+                                        </template>
+                                    </rows>
+                                    <foot>
+                                        <footer id="networkPoliciesGridFooter" span="6" align="right" label="@load(securityVM.rolesTotalItems)"/>
+                                    </foot>
+                                </grid>
+                            </vbox>
+                        </groupbox>
+
+                        <groupbox id="networkPoliciesSubjectsGroupBox" width="100%" closable="false" height="@load(securityVM.subjectsGridGrBoxHeight)">
+                            <caption iconSclass="z-icon-columns" label="@load(securityVM.clickedRoleBindingSubjectsLabel)"/>
+                            <grid id="networkPoliciesSubjectsResultsGrid" model="@load(securityVM.roleSubjectsResults)" height="@load(securityVM.subjectsGridHeight)">
+                                <columns menupopup="auto" sizable="true">
+                                    <column hflex="1" label="Kind" sort="auto(kind)"/>
+                                    <column hflex="2" label="Name" sort="auto(name)"/>
+                                    <column hflex="1" label="Namespace" sort="auto(namespace)"/>
+                                </columns>
+                                <rows>
+                                    <template name="model" var="item">
+                                        <row style="cursor:pointer">
+                                            <label value="${item.kind}"/>
+                                            <label value="${item.name}"/>
+                                            <label value="${item.namespace}"/>
+                                        </row>
+                                    </template>
+                                </rows>
+                            </grid>
+                        </groupbox>
+
+                        <!--<groupbox id="roleRulesGroupBox" width="100%" closable="false" height="@load(securityVM.roleRulesGridGrBoxHeight)">
+                            <caption iconSclass="z-icon-columns" label="@load(securityVM.clickedRoleRulesLabel)"/>
+                            <grid id="securityRoleRulesGrid" model="@load(securityVM.roleRulesResults)" height="@load(securityVM.roleRulesGridHeight)">
+                                <columns menupopup="auto" sizable="true">
+                                    <column hflex="min" label="Id" sort="auto(id)"/>
+                                    <column hflex="1" label="Resources" sort="auto(resourcesAsString)"/>
+                                    <column hflex="1" label="Verbs" sort="auto(verbsAsString)"/>
+                                    <column hflex="1" label="API Groups" sort="auto(apiGroupsAsString)"/>
+                                    <column hflex="1.5" label="Resource Names" sort="auto(resourceNamesAsString)"/>
+                                    <column hflex="1" label="Non Resource URLs" sort="auto(nonResourceURLsAsString)"/>
+                                    <column hflex="1" label="Raws"/>
+                                </columns>
+                                <rows>
+                                    <template name="model" var="item">
+                                        <row style="cursor:pointer">
+                                            <label value="${item.id}" multiline="true"/>
+                                            <label value="${item.resourcesAsString}" multiline="true"/>
+                                            <label value="${item.verbsAsString}" multiline="true"/>
+                                            <label value="${item.apiGroupsAsString}" multiline="true"/>
+                                            <label value="${item.resourceNamesAsString}" multiline="true"/>
+                                            <label value="${item.nonResourceURLsAsString}" multiline="true"/>
+                                            <toolbarbutton label="Raw/Yaml/Json" onClick="@command('showRoleRuleFullDefinition', item=item)" hflex="1"/>
+                                        </row>
+                                    </template>
+                                </rows>
+                                <foot>
+                                    <footer id="roleRulesGridFooter" span="7" align="right" label="@load(securityVM.roleRulesTotalItems)"/>
+                                </foot>
+                            </grid>
+                        </groupbox>-->
+                    </tabpanel>
                 </tabpanels>
             </tabbox>
         </center>
