@@ -589,7 +589,7 @@
                                     <column hflex="2" label="Secrets" tooltiptext="Secrets" sort="auto(secrets)"/>
                                     <column hflex="1" label="Namespace" tooltiptext="Namespace" sort="auto(namespace)"/>
                                     <column hflex="min" label="Creation Time" tooltiptext="Creation Time" sort="auto(creationTime)"/>
-                                    <column hflex="1" tooltiptext="Raws" label="Raws"/>
+                                    <column hflex="min" tooltiptext="Raws" label="Raws"/>
                                 </columns>
                                 <rows>
                                     <template name="model" var="item">
