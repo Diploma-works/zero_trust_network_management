@@ -23,6 +23,7 @@ import com.kubehelper.domain.filters.RBACFilter;
 import com.kubehelper.domain.filters.RolesSecurityFilter;
 import com.kubehelper.domain.models.SecurityModel;
 import com.kubehelper.domain.results.ContainerSecurityResult;
+import com.kubehelper.domain.results.NetworkPolicyResult;
 import com.kubehelper.domain.results.PodSecurityContextResult;
 import com.kubehelper.domain.results.PodSecurityPoliciesResult;
 import com.kubehelper.domain.results.RBACResult;
@@ -86,6 +87,7 @@ public class SecurityVM {
     private boolean isGetContainersSecurityContextsButtonPressed;
     private boolean isGetServiceAccountsButtonPressed;
     private boolean isGetPodSecurityPoliciesButtonPressed;
+    private boolean isGetNetworkPoliciesButtonPressed;
 
     private SecurityModel model;
 
@@ -97,6 +99,7 @@ public class SecurityVM {
     private ListModelList<ContainerSecurityResult> containersSecurityResults = new ListModelList<>();
     private ListModelList<ServiceAccountResult> serviceAccountsResults = new ListModelList<>();
     private ListModelList<PodSecurityPoliciesResult> podsSecurityPoliciesResults = new ListModelList<>();
+    private ListModelList<NetworkPolicyResult> networkPoliciesResults = new ListModelList<>();
 
     private String clickedRoleBindingSubjectsLabel = "";
     private String clickedRoleRulesLabel = "";
@@ -128,6 +131,9 @@ public class SecurityVM {
 
     @Wire
     private Footer podSecurityPoliciesGridFooter;
+
+    @Wire
+    private Footer networkPoliciesGridFooter;
 
 
     @Init
@@ -244,6 +250,19 @@ public class SecurityVM {
     private void setAllNamespacesToModel() {
         model.setNamespaces(model.getNamespaces().isEmpty() ? commonService.getAllNamespaces() : model.getNamespaces());
         logger.debug("Found {} namespaces.", model.getNamespaces());
+    }
+
+    /**
+     * Gets/Searches for all NetworkPolicies depends on namespace.
+     */
+    @Command
+    //TODO: add filters
+    @NotifyChange({"networkPoliciesTotalItems", "networkPoliciesResults"})
+    public void getNetworkPolicies() {
+        securityService.getNetworkPolicies(model);
+        isGetNetworkPoliciesButtonPressed = true;
+        networkPoliciesResults = new ListModelList<>(model.getNetworkPolicyResults());
+        setAllNamespacesToModel();
     }
 
 
@@ -515,6 +534,18 @@ public class SecurityVM {
     }
 
     /**
+     * Shows full definitions window for NetworkPolicy.
+     *
+     * @param item - @{@link NetworkPolicyResult} item
+     */
+    @Command
+    public void showNetworkPolicyFullDefinition(@BindingParam("item") NetworkPolicyResult item) {
+        Map<String, Object> parameters = getParametersMap(item.getRawResourceType(), item.getResourceName(), item.getResourceName(), item.getNamespace(), item.getFullDefinition());
+        Window window = (Window) Executions.createComponents(Global.PATH_TO_RAW_RESOURCE_ZUL, null, parameters);
+        window.doModal();
+    }
+
+    /**
      * Shows(by click) rules that belongs to role.
      *
      * @param item - @{@link RoleResult} item.
@@ -609,6 +640,12 @@ public class SecurityVM {
         return podsSecurityPoliciesResults;
     }
 
+    public ListModelList<NetworkPolicyResult> getNetworkPoliciesResults() {
+        showNotificationAndExceptions(isGetNetworkPoliciesButtonPressed, networkPoliciesResults, networkPoliciesGridFooter);
+        isGetNetworkPoliciesButtonPressed = false;
+        return networkPoliciesResults;
+    }
+
 
     //  SELECTED NAMESPACES ================
 
@@ -696,6 +733,10 @@ public class SecurityVM {
 
     public String getPodsSecurityPoliciesTotalItems() {
         return String.format("Total Items: %d", podsSecurityPoliciesResults.size());
+    }
+
+    public String getNetworkPoliciesTotalItems() {
+        return String.format("Total Items: %d", networkPoliciesResults.size());
     }
 
 

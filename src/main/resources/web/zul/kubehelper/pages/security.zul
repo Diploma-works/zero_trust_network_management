@@ -589,7 +589,7 @@
                                     <column hflex="2" label="Secrets" tooltiptext="Secrets" sort="auto(secrets)"/>
                                     <column hflex="1" label="Namespace" tooltiptext="Namespace" sort="auto(namespace)"/>
                                     <column hflex="min" label="Creation Time" tooltiptext="Creation Time" sort="auto(creationTime)"/>
-                                    <column hflex="min" tooltiptext="Raws" label="Raws"/>
+                                    <column hflex="1" tooltiptext="Raws" label="Raws"/>
                                 </columns>
                                 <rows>
                                     <template name="model" var="item">
@@ -742,7 +742,7 @@
                                     <cell width="59%">
                                     </cell>
                                     <cell id="cellGetBtnNetworkPolicies" width="10%">
-                                        <button id="getNetworkPoliciesBtn" label="Search" iconSclass="z-icon-search" onClick="@command('getNetworkPolices')" width="100%"/>
+                                        <button id="getNetworkPoliciesBtn" label="Search" iconSclass="z-icon-search" onClick="@command('getNetworkPolicies')" width="100%"/>
                                     </cell>
                                 </hbox>
                                 <separator width="100%" orient="horizontal" bar="false"/>
@@ -751,8 +751,9 @@
                         <groupbox id="networkPoliciesGrBox" width="100%" closable="false" height="@load(securityVM.rolesGridGrBoxHeight)">
                             <caption iconSclass="fas fa-list" label="Results"/>
                             <vbox height="100%" width="100%">
-                                <grid id="securityNetworkPoliciesGrid" model="@load(securityVM.rolesResults)" height="@load(securityVM.rolesGridHeight)">
-                                    <auxhead id="networkPoliciesGridAuxHead">
+                                <grid id="securityNetworkPoliciesGrid" model="@load(securityVM.networkPoliciesResults)" height="@load(securityVM.rolesGridHeight)">
+                                    <!-- TODO: add filters -->
+                                    <!--<auxhead id="networkPoliciesGridAuxHead">
                                         <auxheader>
                                             <span sclass="z-icon-hashtag"/>
                                         </auxheader>
@@ -789,35 +790,46 @@
                                         <auxheader class="fullDefinitionIdHeader">
                                             <span sclass="z-icon-file-text"/>
                                         </auxheader>
-                                    </auxhead>
+                                    </auxhead>-->
                                     <columns menupopup="auto" sizable="true">
-                                        <column hflex="min" label="Id" sort="auto(id)"/>
-                                        <column hflex="3" label="Role Name" sort="auto(resourceName)"/>
-                                        <column hflex="2" label="Namespace" sort="auto(namespace)"/>
-                                        <column hflex="1" label="Kind" sort="auto(resourceType)"/>
+                                        <column hflex="min" label="Resource Name" sort="auto(resourceName)"/>
+                                        <column hflex="min" label="Namespace" sort="auto(namespace)"/>
+                                        <column hflex="2" label="Annotations" sort="auto(annotationsAsString)"/>
+                                        <column hflex="2" label="Pod Selector Labels" sort="auto(podSelectorLabelsAsString)"/>
                                         <column hflex="min" label="Creation Time" sort="auto(creationTime)"/>
                                         <column hflex="min" label="Raws"/>
                                     </columns>
                                     <rows>
                                         <template name="model" var="item">
-                                            <row onClick="@command('showRoleRules', clickedItem=item)" style="cursor:pointer">
-                                                <label value="${item.id}"/>
+                                            <row style="cursor:pointer"><!-- TODO: add  onClick="@command('showNetworkPolicy', clickedItem=item)" -->
                                                 <label value="${item.resourceName}"/>
                                                 <label value="${item.namespace}"/>
-                                                <label value="${item.resourceType}"/>
+                                                <label value="${item.annotationsAsString}"/>
+                                                <label value="${item.podSelectorLabelsAsString}"/>
                                                 <label value="${item.creationTime}"/>
-                                                <toolbarbutton label="Raw/Yaml/Json" onClick="@command('showRoleFullDefinition', item=item)" hflex="1"/>
+                                                <toolbarbutton label="Raw/Yaml/Json" onClick="@command('showNetworkPolicyFullDefinition', item=item)" hflex="1"/>
                                             </row>
                                         </template>
                                     </rows>
                                     <foot>
-                                        <footer id="networkPoliciesGridFooter" span="6" align="right" label="@load(securityVM.rolesTotalItems)"/>
+                                        <footer id="networkPoliciesGridFooter" span="6" align="right" label="@load(securityVM.networkPoliciesTotalItems)"/>
                                     </foot>
                                 </grid>
                             </vbox>
                         </groupbox>
-
-                        <groupbox id="networkPoliciesSubjectsGroupBox" width="100%" closable="false" height="@load(securityVM.subjectsGridGrBoxHeight)">
+                        <tabbox width="100%" sclass="nav_tabs" style="border: none">
+                            <tabs id="networkPolicyTabs">
+                                <tab label="Describe Network Policy"/>
+                                <tab label="Create/Update Network Policy"/>
+                            </tabs>
+                            <tabpanels>
+                                <tabpanel>
+                                </tabpanel>
+                                <tabpanel>
+                                </tabpanel>
+                            </tabpanels>
+                        </tabbox>
+                        <!--<groupbox id="networkPoliciesSubjectsGroupBox" width="100%" closable="false" height="@load(securityVM.subjectsGridGrBoxHeight)">
                             <caption iconSclass="z-icon-columns" label="@load(securityVM.clickedRoleBindingSubjectsLabel)"/>
                             <grid id="networkPoliciesSubjectsResultsGrid" model="@load(securityVM.roleSubjectsResults)" height="@load(securityVM.subjectsGridHeight)">
                                 <columns menupopup="auto" sizable="true">
@@ -835,7 +847,7 @@
                                     </template>
                                 </rows>
                             </grid>
-                        </groupbox>
+                        </groupbox>-->
 
                         <!--<groupbox id="roleRulesGroupBox" width="100%" closable="false" height="@load(securityVM.roleRulesGridGrBoxHeight)">
                             <caption iconSclass="z-icon-columns" label="@load(securityVM.clickedRoleRulesLabel)"/>

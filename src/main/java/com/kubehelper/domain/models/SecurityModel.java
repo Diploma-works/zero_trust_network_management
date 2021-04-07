@@ -23,6 +23,7 @@ import com.kubehelper.common.Resource;
 import com.kubehelper.domain.filters.RBACFilter;
 import com.kubehelper.domain.filters.RolesSecurityFilter;
 import com.kubehelper.domain.results.ContainerSecurityResult;
+import com.kubehelper.domain.results.NetworkPolicyResult;
 import com.kubehelper.domain.results.PodSecurityContextResult;
 import com.kubehelper.domain.results.PodSecurityPoliciesResult;
 import com.kubehelper.domain.results.RBACResult;
@@ -59,6 +60,7 @@ public class SecurityModel implements PageModel {
     private List<ContainerSecurityResult> containersSecurityResults = new ArrayList<>();
     private List<ServiceAccountResult> serviceAccountsResults = new ArrayList<>();
     private List<PodSecurityPoliciesResult> podSecurityPoliciesResults = new ArrayList<>();
+    private List<NetworkPolicyResult> networkPolicyResults = new ArrayList<>();
     //key is RoleResult id
     private RolesSecurityFilter rolesFilter = new RolesSecurityFilter();
     private RBACFilter rbacsFilter = new RBACFilter();
@@ -105,6 +107,11 @@ public class SecurityModel implements PageModel {
 
     public SecurityModel addPodSecurityPolicy(PodSecurityPoliciesResult result) {
         podSecurityPoliciesResults.add(result);
+        return this;
+    }
+
+    public SecurityModel addNetworkPolicy(NetworkPolicyResult result) {
+        networkPolicyResults.add(result);
         return this;
     }
 
@@ -308,6 +315,15 @@ public class SecurityModel implements PageModel {
 
     public SecurityModel setSkipKubeNamespaces(boolean skipKubeNamespaces) {
         this.skipKubeNamespaces = skipKubeNamespaces;
+        return this;
+    }
+
+    public List<NetworkPolicyResult> getNetworkPolicyResults() {
+        return networkPolicyResults;
+    }
+
+    public SecurityModel setNetworkPoliciesResults(List<NetworkPolicyResult> networkPoliciesResults) {
+        this.networkPolicyResults = networkPoliciesResults;
         return this;
     }
 }

@@ -21,6 +21,7 @@ import com.kubehelper.common.KubeAPI;
 import com.kubehelper.common.Resource;
 import com.kubehelper.domain.models.SecurityModel;
 import com.kubehelper.domain.results.ContainerSecurityResult;
+import com.kubehelper.domain.results.NetworkPolicyResult;
 import com.kubehelper.domain.results.PodSecurityContextResult;
 import com.kubehelper.domain.results.PodSecurityPoliciesResult;
 import com.kubehelper.domain.results.RBACResult;
@@ -33,6 +34,9 @@ import io.fabric8.kubernetes.api.model.rbac.Subject;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.kubernetes.client.openapi.models.V1Container;
+import io.kubernetes.client.openapi.models.V1NetworkPolicy;
+import io.kubernetes.client.openapi.models.V1NetworkPolicyList;
+import io.kubernetes.client.openapi.models.V1NetworkPolicySpec;
 import io.kubernetes.client.openapi.models.V1ObjectMeta;
 import io.kubernetes.client.openapi.models.V1ObjectReference;
 import io.kubernetes.client.openapi.models.V1Pod;
@@ -62,6 +66,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -125,6 +130,12 @@ public class SecurityService {
         model.getServiceAccountsResults().clear();
         model.getSearchExceptions().clear();
         searchInServiceAccounts(model);
+    }
+
+    public void getNetworkPolicies(SecurityModel model) {
+        model.getNetworkPolicyResults().clear();
+        model.getSearchExceptions().clear();
+        searchInNetworkPolicies(model);
     }
 
 
@@ -463,5 +474,35 @@ public class SecurityService {
 
     private boolean skipKubeNamespace(SecurityModel securityModel, String namespace) {
         return securityModel.isSkipKubeNamespaces() && Objects.nonNull(namespace) && namespace.startsWith("kube-");
+    }
+
+    // NETWORK POLICIES =============
+    private void searchInNetworkPolicies(SecurityModel model) {
+        V1NetworkPolicyList policiesList = kubeAPI.getV1NetworkPolicyList(model.getSelectedNetworkPoliciesNamespace(), model);
+
+        for (V1NetworkPolicy policy : policiesList.getItems()) {
+            try {
+                addNetworkPolicyToModel(policy.getMetadata(), model, policy.getSpec(), policy.toString());
+            } catch (RuntimeException e) {
+                model.addSearchException(e);
+                logger.error(e.getMessage(), e);
+            }
+        }
+
+    }
+
+    private void addNetworkPolicyToModel(V1ObjectMeta meta, SecurityModel model, V1NetworkPolicySpec spec, String fullDefinition) {
+        String deleteAnnotation = "kubectl.kubernetes.io/last-applied-configuration";
+        NetworkPolicyResult result = new NetworkPolicyResult()
+                .setResourceName(meta.getName() == null ? "null" : meta.getName())
+                .setNamespace(meta.getNamespace() == null ? "null" : meta.getNamespace())
+                .setAnnotations(meta.getAnnotations() == null ? Collections.emptyMap() : meta.getAnnotations())
+                .setPodSelectorLabels(spec.getPodSelector().getMatchLabels())
+                .setFullDefinition(fullDefinition)
+                .setCreationTime(getParsedCreationTime(meta.getCreationTimestamp()));
+
+        result.getAnnotations().remove(deleteAnnotation);
+        // TODO: describe ingress and egress
+        model.addNetworkPolicy(result);
     }
 }
