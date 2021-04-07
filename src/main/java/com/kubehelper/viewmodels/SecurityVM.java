@@ -839,6 +839,14 @@ public class SecurityVM {
         return centerLayoutHeight - 115 + "px";
     }
 
+    public String getNetworkPoliciesGrBoxHeight() {
+        return Math.round((centerLayoutHeight - 115) * 0.4) + "px";
+    }
+
+    public String getNetworkPoliciesEditorBoxHeight() {
+        return Math.round((centerLayoutHeight - 115) * 0.6) + "px";
+    }
+
     public boolean isSkipKubeNamespaces() {
         return model.isSkipKubeNamespaces();
     }

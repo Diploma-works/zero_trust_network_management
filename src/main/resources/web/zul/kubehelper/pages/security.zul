@@ -748,7 +748,7 @@
                                 <separator width="100%" orient="horizontal" bar="false"/>
                             </vbox>
                         </groupbox>
-                        <groupbox id="networkPoliciesGrBox" width="100%" closable="false" height="@load(securityVM.rolesGridGrBoxHeight)">
+                        <groupbox id="networkPoliciesGrBox" width="100%" closable="false" height="@load(securityVM.networkPoliciesGrBoxHeight)">
                             <caption iconSclass="fas fa-list" label="Results"/>
                             <vbox height="100%" width="100%">
                                 <grid id="securityNetworkPoliciesGrid" model="@load(securityVM.networkPoliciesResults)" height="@load(securityVM.rolesGridHeight)">
@@ -817,68 +817,46 @@
                                 </grid>
                             </vbox>
                         </groupbox>
-                        <tabbox width="100%" sclass="nav_tabs" style="border: none">
+                        <tabbox  id="networkPoliciesEditorBox" width="100%" height="@load(securityVM.networkPoliciesEditorBoxHeight)" sclass="nav_tabs" style="border: none">
                             <tabs id="networkPolicyTabs">
                                 <tab label="Describe Network Policy"/>
                                 <tab label="Create/Update Network Policy"/>
                             </tabs>
                             <tabpanels>
                                 <tabpanel>
+                                    <borderlayout height="100%">
+                                        <west title="Ingress rules" border="normal" size="33%">
+                                            <div style="background:#B8D335">
+                                            </div>
+                                        </west>
+                                        <center title="Network Policy definition" border="normal">
+                                            <div style="background:#B8D335">
+                                            </div>
+                                        </center>
+                                        <east title="Egress rules" border="normal" size="33%">
+                                            <div style="background:#B8D335">
+                                            </div>
+                                        </east>
+                                    </borderlayout>
                                 </tabpanel>
                                 <tabpanel>
+                                    <borderlayout height="100%">
+                                        <west title="Ingress rules" border="normal" size="33%">
+                                            <div style="background:#B8D335" height="100%">
+                                            </div>
+                                        </west>
+                                        <center title="Network Policy definition" border="normal">
+                                            <div style="background:#B8D335" height="100%">
+                                            </div>
+                                        </center>
+                                        <east title="Egress rules" border="normal" size="33%">
+                                            <div style="background:#B8D335" height="100%">
+                                            </div>
+                                        </east>
+                                    </borderlayout>
                                 </tabpanel>
                             </tabpanels>
                         </tabbox>
-                        <!--<groupbox id="networkPoliciesSubjectsGroupBox" width="100%" closable="false" height="@load(securityVM.subjectsGridGrBoxHeight)">
-                            <caption iconSclass="z-icon-columns" label="@load(securityVM.clickedRoleBindingSubjectsLabel)"/>
-                            <grid id="networkPoliciesSubjectsResultsGrid" model="@load(securityVM.roleSubjectsResults)" height="@load(securityVM.subjectsGridHeight)">
-                                <columns menupopup="auto" sizable="true">
-                                    <column hflex="1" label="Kind" sort="auto(kind)"/>
-                                    <column hflex="2" label="Name" sort="auto(name)"/>
-                                    <column hflex="1" label="Namespace" sort="auto(namespace)"/>
-                                </columns>
-                                <rows>
-                                    <template name="model" var="item">
-                                        <row style="cursor:pointer">
-                                            <label value="${item.kind}"/>
-                                            <label value="${item.name}"/>
-                                            <label value="${item.namespace}"/>
-                                        </row>
-                                    </template>
-                                </rows>
-                            </grid>
-                        </groupbox>-->
-
-                        <!--<groupbox id="roleRulesGroupBox" width="100%" closable="false" height="@load(securityVM.roleRulesGridGrBoxHeight)">
-                            <caption iconSclass="z-icon-columns" label="@load(securityVM.clickedRoleRulesLabel)"/>
-                            <grid id="securityRoleRulesGrid" model="@load(securityVM.roleRulesResults)" height="@load(securityVM.roleRulesGridHeight)">
-                                <columns menupopup="auto" sizable="true">
-                                    <column hflex="min" label="Id" sort="auto(id)"/>
-                                    <column hflex="1" label="Resources" sort="auto(resourcesAsString)"/>
-                                    <column hflex="1" label="Verbs" sort="auto(verbsAsString)"/>
-                                    <column hflex="1" label="API Groups" sort="auto(apiGroupsAsString)"/>
-                                    <column hflex="1.5" label="Resource Names" sort="auto(resourceNamesAsString)"/>
-                                    <column hflex="1" label="Non Resource URLs" sort="auto(nonResourceURLsAsString)"/>
-                                    <column hflex="1" label="Raws"/>
-                                </columns>
-                                <rows>
-                                    <template name="model" var="item">
-                                        <row style="cursor:pointer">
-                                            <label value="${item.id}" multiline="true"/>
-                                            <label value="${item.resourcesAsString}" multiline="true"/>
-                                            <label value="${item.verbsAsString}" multiline="true"/>
-                                            <label value="${item.apiGroupsAsString}" multiline="true"/>
-                                            <label value="${item.resourceNamesAsString}" multiline="true"/>
-                                            <label value="${item.nonResourceURLsAsString}" multiline="true"/>
-                                            <toolbarbutton label="Raw/Yaml/Json" onClick="@command('showRoleRuleFullDefinition', item=item)" hflex="1"/>
-                                        </row>
-                                    </template>
-                                </rows>
-                                <foot>
-                                    <footer id="roleRulesGridFooter" span="7" align="right" label="@load(securityVM.roleRulesTotalItems)"/>
-                                </foot>
-                            </grid>
-                        </groupbox>-->
                     </tabpanel>
                 </tabpanels>
             </tabbox>
