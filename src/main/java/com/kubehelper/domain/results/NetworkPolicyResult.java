@@ -18,8 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package com.kubehelper.domain.results;
 
 import com.kubehelper.common.Resource;
+import io.kubernetes.client.openapi.models.V1NetworkPolicyEgressRule;
+import io.kubernetes.client.openapi.models.V1NetworkPolicyIngressRule;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -36,6 +40,9 @@ public class NetworkPolicyResult {
 
     private Map<String, String> annotations = new HashMap<>();
     private Map<String, String> podSelectorLabels = new HashMap<>();
+
+    private List<V1NetworkPolicyIngressRule> ingress = new ArrayList<>();
+    private List<V1NetworkPolicyEgressRule> egress = new ArrayList<>();
 
     public String getResourceName() {
         return resourceName;
@@ -79,6 +86,14 @@ public class NetworkPolicyResult {
         return resourceType;
     }
 
+    public List<V1NetworkPolicyIngressRule> getIngress() {
+        return ingress;
+    }
+
+    public List<V1NetworkPolicyEgressRule> getEgress() {
+        return egress;
+    }
+
     public NetworkPolicyResult setResourceName(String resourceName) {
         this.resourceName = resourceName;
         return this;
@@ -106,6 +121,16 @@ public class NetworkPolicyResult {
 
     public NetworkPolicyResult setFullDefinition(String fullDefinition) {
         this.fullDefinition = fullDefinition;
+        return this;
+    }
+
+    public NetworkPolicyResult setIngress(List<V1NetworkPolicyIngressRule> ingress) {
+        this.ingress = ingress;
+        return this;
+    }
+
+    public NetworkPolicyResult setEgress(List<V1NetworkPolicyEgressRule> egress) {
+        this.egress = egress;
         return this;
     }
 }

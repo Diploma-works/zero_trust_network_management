@@ -499,7 +499,9 @@ public class SecurityService {
                 .setAnnotations(meta.getAnnotations() == null ? Collections.emptyMap() : meta.getAnnotations())
                 .setPodSelectorLabels(spec.getPodSelector().getMatchLabels())
                 .setFullDefinition(fullDefinition)
-                .setCreationTime(getParsedCreationTime(meta.getCreationTimestamp()));
+                .setCreationTime(getParsedCreationTime(meta.getCreationTimestamp()))
+                .setEgress(spec.getEgress())
+                .setIngress(spec.getIngress());
 
         result.getAnnotations().remove(deleteAnnotation);
         // TODO: describe ingress and egress
