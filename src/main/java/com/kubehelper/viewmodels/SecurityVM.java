@@ -22,6 +22,7 @@ import com.kubehelper.common.Resource;
 import com.kubehelper.domain.filters.RBACFilter;
 import com.kubehelper.domain.filters.RolesSecurityFilter;
 import com.kubehelper.domain.models.SecurityModel;
+import com.kubehelper.domain.pattern.networking.NetworkPolicyPattern;
 import com.kubehelper.domain.results.ContainerSecurityResult;
 import com.kubehelper.domain.results.NetworkPolicyResult;
 import com.kubehelper.domain.results.PodSecurityContextResult;
@@ -100,6 +101,9 @@ public class SecurityVM {
     private ListModelList<ServiceAccountResult> serviceAccountsResults = new ListModelList<>();
     private ListModelList<PodSecurityPoliciesResult> podsSecurityPoliciesResults = new ListModelList<>();
     private ListModelList<NetworkPolicyResult> networkPoliciesResults = new ListModelList<>();
+
+    private NetworkPolicyResult clickedNetworkPolicyResult = new NetworkPolicyResult();
+    private NetworkPolicyPattern networkPolicyPattern = new NetworkPolicyPattern();
 
     private String clickedRoleBindingSubjectsLabel = "";
     private String clickedRoleRulesLabel = "";
@@ -560,6 +564,31 @@ public class SecurityVM {
     }
 
     /**
+     * Shows(by click) network policy.
+     *
+     * @param item - @{@link NetworkPolicyResult} item.
+     */
+    @Command
+    @NotifyChange({"clickedNetworkPolicyResult"})
+    public void showNetworkPolicy(@BindingParam("clickedItem") NetworkPolicyResult item) {
+        clickedNetworkPolicyResult = item;
+    }
+
+    public NetworkPolicyResult getClickedNetworkPolicyResult() {
+        return clickedNetworkPolicyResult;
+    }
+
+    @Command
+    @NotifyChange({"networkPoliciesResults", "networkPolicyPattern", "networkPoliciesTotalItems"})
+    public void createNetworkPolicy() {
+        logger.info("Received network policy: " + networkPolicyPattern);
+        model.setNetworkPolicyPattern(networkPolicyPattern);
+        securityService.createNetworkPolicy(model);
+        networkPolicyPattern = new NetworkPolicyPattern();
+        getNetworkPolicies();
+    }
+
+    /**
      * Builds parameters map for WIndow parameters.
      *
      * @param resource  - Resource
@@ -644,6 +673,10 @@ public class SecurityVM {
         showNotificationAndExceptions(isGetNetworkPoliciesButtonPressed, networkPoliciesResults, networkPoliciesGridFooter);
         isGetNetworkPoliciesButtonPressed = false;
         return networkPoliciesResults;
+    }
+
+    public NetworkPolicyPattern getNetworkPolicyPattern() {
+        return networkPolicyPattern;
     }
 
 
@@ -845,6 +878,10 @@ public class SecurityVM {
 
     public String getNetworkPoliciesEditorBoxHeight() {
         return Math.round((centerLayoutHeight - 115) * 0.6) + "px";
+    }
+
+    public String getNetworkPoliciesEditorEditorHeight() {
+        return Math.round((centerLayoutHeight - 115) * 0.6) - 32 + "px";
     }
 
     public boolean isSkipKubeNamespaces() {

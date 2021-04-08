@@ -20,6 +20,9 @@ package com.kubehelper.services;
 import com.kubehelper.common.KubeAPI;
 import com.kubehelper.common.Resource;
 import com.kubehelper.domain.models.SecurityModel;
+import com.kubehelper.domain.pattern.networking.NetworkPolicyPattern;
+import com.kubehelper.domain.pattern.networking.NetworkPolicyPeerPattern;
+import com.kubehelper.domain.pattern.networking.NetworkPolicyPortPattern;
 import com.kubehelper.domain.results.ContainerSecurityResult;
 import com.kubehelper.domain.results.NetworkPolicyResult;
 import com.kubehelper.domain.results.PodSecurityContextResult;
@@ -28,6 +31,17 @@ import com.kubehelper.domain.results.RBACResult;
 import com.kubehelper.domain.results.RoleResult;
 import com.kubehelper.domain.results.RoleRuleResult;
 import com.kubehelper.domain.results.ServiceAccountResult;
+import io.fabric8.kubernetes.api.model.IntOrString;
+import io.fabric8.kubernetes.api.model.LabelSelector;
+import io.fabric8.kubernetes.api.model.LabelSelectorRequirement;
+import io.fabric8.kubernetes.api.model.networking.v1.IPBlock;
+import io.fabric8.kubernetes.api.model.networking.v1.NetworkPolicy;
+import io.fabric8.kubernetes.api.model.networking.v1.NetworkPolicyBuilder;
+import io.fabric8.kubernetes.api.model.networking.v1.NetworkPolicyFluent.SpecNested;
+import io.fabric8.kubernetes.api.model.networking.v1.NetworkPolicyPeer;
+import io.fabric8.kubernetes.api.model.networking.v1.NetworkPolicyPort;
+import io.fabric8.kubernetes.api.model.networking.v1.NetworkPolicySpecFluent.EgressNested;
+import io.fabric8.kubernetes.api.model.networking.v1.NetworkPolicySpecFluent.IngressNested;
 import io.fabric8.kubernetes.api.model.rbac.ClusterRoleBinding;
 import io.fabric8.kubernetes.api.model.rbac.RoleBinding;
 import io.fabric8.kubernetes.api.model.rbac.Subject;
@@ -66,8 +80,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -504,7 +521,118 @@ public class SecurityService {
                 .setIngress(spec.getIngress());
 
         result.getAnnotations().remove(deleteAnnotation);
-        // TODO: describe ingress and egress
         model.addNetworkPolicy(result);
     }
+
+    public void createNetworkPolicy(SecurityModel model) {
+        NetworkPolicyPattern networkPolicyPattern = model.getNetworkPolicyPattern();
+        networkPolicyPattern.parse();
+        logger.info("Parsed network policy: " + networkPolicyPattern);
+        KubernetesClient client;
+        if(networkPolicyPattern.getNamespace() == null || networkPolicyPattern.getNamespace().isEmpty()) {
+            client = fabricClient;
+        } else {
+            client = ((DefaultKubernetesClient) fabricClient).inNamespace(networkPolicyPattern.getNamespace());
+        }
+        try {
+            NetworkPolicy networkPolicy = convertPatternToPolicy(model.getNetworkPolicyPattern());
+            logger.info("Converted network policy: " + networkPolicy);
+            client.network()
+                    .networkPolicies()
+                    .createOrReplace(networkPolicy);
+        } catch (RuntimeException e) {
+            model.addSearchException(e);
+            logger.error(e.getMessage(), e);
+        }
+    }
+
+    public static NetworkPolicy convertPatternToPolicy(NetworkPolicyPattern pattern) {
+        String DESCRIPTION_ANNOTATION = "kubehelper.com/description";
+        NetworkPolicyBuilder builder = new NetworkPolicyBuilder();
+
+        Map<String, String> annotations = new HashMap<>();
+        annotations.put(DESCRIPTION_ANNOTATION, pattern.getDescription());
+
+        String namespace = (pattern.getNamespace() == null || pattern.getNamespace().isEmpty()) ? null : pattern.getNamespace();
+
+        builder.withNewMetadata()
+                .withName(pattern.getName())
+                .withNamespace(namespace)
+                .withAnnotations(annotations)
+                .endMetadata();
+
+        SpecNested<NetworkPolicyBuilder> spec = builder.withNewSpec();
+
+        // podSelector
+        spec.withNewPodSelector()
+                .withMatchLabels(pattern.getPodSelectorLabels())
+                .endPodSelector();
+
+        // ingress
+        if ("Ingress".equals(pattern.getType())) {
+            IngressNested<SpecNested<NetworkPolicyBuilder>> ingress = spec.addNewIngress();
+            if (pattern.getRule().getPorts() != null && !pattern.getRule().getPorts().isEmpty()) {
+                ingress.withPorts(parsePorts(pattern.getRule().getPorts()));
+            }
+            if (pattern.getRule().getSelector() != null) {
+                ingress.withFrom(parsePeer(pattern.getRule().getSelector()));
+            }
+            ingress.endIngress();
+        }
+
+        // egress
+        if ("Egress".equals(pattern.getType())) {
+            EgressNested<SpecNested<NetworkPolicyBuilder>> egress = spec.addNewEgress();
+            if (pattern.getRule().getPorts() != null && !pattern.getRule().getPorts().isEmpty()) {
+                egress.withPorts(parsePorts(pattern.getRule().getPorts()));
+            }
+            if (pattern.getRule().getSelector() != null) {
+                egress.withTo(parsePeer(pattern.getRule().getSelector()));
+            }
+            egress.endEgress();
+        }
+
+        // policyTypes
+        spec.withPolicyTypes(pattern.getType());
+        spec.endSpec();
+
+        return builder.build();
+    }
+
+    private static NetworkPolicyPeer parsePeer(NetworkPolicyPeerPattern peer) {
+        NetworkPolicyPeer networkPolicyPeer = new NetworkPolicyPeer();
+        if (peer.getIpBlock() != null) {
+            IPBlock ipBlock = new IPBlock();
+            ipBlock.setCidr(peer.getIpBlock().getCidr());
+            if (peer.getIpBlock().getExcept() != null) {
+                ipBlock.setExcept(Arrays.asList(peer.getIpBlock().getExcept().split(",")));
+            }
+            networkPolicyPeer.setIpBlock(ipBlock);
+        }
+
+        if (peer.getNamespaceName() != null) {
+            networkPolicyPeer.setNamespaceSelector(new LabelSelector(
+                    Collections.singletonList(
+                            new LabelSelectorRequirement(
+                                    "name",
+                                    "In",
+                                    Collections.singletonList(peer.getNamespaceName()))
+                    ), null)
+            );
+        }
+
+        if (peer.getPodSelectorLabels() != null) {
+            networkPolicyPeer.setPodSelector(new LabelSelector(null, peer.getPodSelectorLabels()));
+        }
+        return networkPolicyPeer;
+    }
+
+    private static List<NetworkPolicyPort> parsePorts(List<NetworkPolicyPortPattern> ports) {
+        List<NetworkPolicyPort> portsList = new ArrayList<>();
+        for (NetworkPolicyPortPattern port : ports) {
+            portsList.add(new NetworkPolicyPort(new IntOrString(port.getPort()), port.getProtocol()));
+        }
+        return portsList;
+    }
+
 }

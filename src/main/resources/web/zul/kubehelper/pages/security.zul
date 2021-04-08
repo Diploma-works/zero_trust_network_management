@@ -797,7 +797,7 @@
                                         <column hflex="2" label="Annotations" sort="auto(annotationsAsString)"/>
                                         <column hflex="2" label="Pod Selector Labels" sort="auto(podSelectorLabelsAsString)"/>
                                         <column hflex="min" label="Creation Time" sort="auto(creationTime)"/>
-                                        <column hflex="min" label="Raws"/>
+                                        <column hflex="1" label="Raws"/>
                                     </columns>
                                     <rows>
                                         <template name="model" var="item">
@@ -819,38 +819,153 @@
                         </groupbox>
                         <tabbox  id="networkPoliciesEditorBox" width="100%" height="@load(securityVM.networkPoliciesEditorBoxHeight)" sclass="nav_tabs" style="border: none">
                             <tabs id="networkPolicyTabs">
-                                <tab label="Describe Network Policy"/>
-                                <tab label="Create/Update Network Policy"/>
+                                <tab label="Create Network Policy"/>
+                                <tab label="Definition of Network Policy"/>
                             </tabs>
                             <tabpanels>
                                 <tabpanel>
-                                    <borderlayout height="100%">
-                                        <west title="Ingress rules" border="normal" size="33%">
-                                            <div style="background:#B8D335">
-                                            </div>
-                                        </west>
-                                        <center title="Network Policy definition" border="normal">
-                                            <div style="background:#B8D335">
-                                            </div>
-                                        </center>
-                                        <east title="Egress rules" border="normal" size="33%">
-                                            <div style="background:#B8D335">
-                                            </div>
-                                        </east>
-                                    </borderlayout>
+                                    <vlayout>
+                                        <borderlayout height="340px">
+                                            <west title="Definition" border="normal" size="50%">
+                                                <grid>
+                                                    <rows>
+                                                        <row>
+                                                            <label value="Name" width="200px" />
+                                                            <hlayout>
+                                                                <textbox value="@bind(securityVM.networkPolicyPattern.name)"
+                                                                         width="200px" tabindex="1" />
+                                                            </hlayout>
+                                                        </row>
+                                                        <row>
+                                                            Namespace
+                                                            <hlayout>
+                                                                <textbox value="@bind(securityVM.networkPolicyPattern.namespace)"
+                                                                         width="200px" tabindex="2" />
+                                                            </hlayout>
+                                                        </row>
+                                                        <row>
+                                                            Description
+                                                            <hlayout>
+                                                                <textbox value="@bind(securityVM.networkPolicyPattern.description)"
+                                                                         width="200px" tabindex="3" />
+                                                            </hlayout>
+                                                        </row>
+                                                        <row>
+                                                            Pod Selector labels
+                                                            <hlayout>
+                                                                <!--<chosenbox hflex="1"
+                                                                           model="@load(securityVM.networkPolicyPattern.podSelectorLabelsString)"
+                                                                           emptyMessage="label name=value"
+                                                                           creatable="true" createMessage="Create label: {0}"
+                                                                           onSearch="@command('newPodSelector', contact=event.value)" />-->
+                                                                <textbox value="@bind(securityVM.networkPolicyPattern.podSelectorLabelsString)"
+                                                                         width="200px" tabindex="4" />
+                                                            </hlayout>
+                                                        </row>
+                                                        <row>
+                                                            Policy type
+                                                            <listbox selectedItem="@bind(securityVM.networkPolicyPattern.type)"
+                                                                     mold="select" tabindex="5">
+                                                                <listitem label="Ingress" value="Ingress" />
+                                                                <listitem label="Egress"  value="Egress" />
+                                                            </listbox>
+                                                        </row>
+                                                    </rows>
+                                                </grid>
+                                            </west>
+                                            <east title="Rule" border="normal" size="50%">
+                                                <grid>
+                                                    <rows>
+                                                        <row style="background:#f2f2f2"><cell colspan="2" style="text-align:center">Ports</cell></row>
+                                                        <row>
+                                                            Port
+                                                            <hlayout>
+                                                                <textbox value="@bind(securityVM.networkPolicyPattern.port)"
+                                                                         width="200px" />
+                                                            </hlayout>
+                                                        </row>
+                                                        <row>
+                                                            Protocol
+                                                            <hlayout>
+                                                                <textbox value="@bind(securityVM.networkPolicyPattern.protocol)"
+                                                                         width="200px" />
+                                                            </hlayout>
+                                                        </row>
+                                                        <row style="background:#f2f2f2"><cell colspan="2" style="text-align:center">IP Endpoint</cell></row>
+                                                        <row>
+                                                            CIDR
+                                                            <hlayout>
+                                                                <textbox value="@bind(securityVM.networkPolicyPattern.cidr)"
+                                                                         width="200px" />
+                                                            </hlayout>
+                                                        </row>
+                                                        <row>
+                                                            Except
+                                                            <hlayout>
+                                                                <textbox value="@bind(securityVM.networkPolicyPattern.except)"
+                                                                         width="200px" />
+                                                            </hlayout>
+                                                        </row>
+                                                        <row style="background:#f2f2f2"><cell colspan="2" style="text-align:center">In-Cluster Endpoint</cell></row>
+                                                        <row>
+                                                            Namespace
+                                                            <hlayout>
+                                                                <textbox value="@bind(securityVM.networkPolicyPattern.ruleNamespace)"
+                                                                         width="200px" />
+                                                            </hlayout>
+                                                        </row>
+                                                        <row>
+                                                            Pod Selector labels
+                                                            <hlayout>
+                                                                <textbox value="@bind(securityVM.networkPolicyPattern.rulePodSelectorLabels)"
+                                                                         width="200px" />
+                                                            </hlayout>
+                                                        </row>
+                                                    </rows>
+                                                </grid>
+                                            </east>
+                                        </borderlayout>
+                                        <cell style="text-align:center">
+                                            <vlayout>
+                                                <!--<label visible="@load(empty vmsgs)"
+                                                       value="@load(empty vmsgs ? 'Form successfully submitted!' : '', before='submit')" />-->
+                                                <button label="Submit" onClick="@command('createNetworkPolicy')"
+                                                        width="100px" height="30px" />
+                                            </vlayout>
+                                        </cell>
+                                    </vlayout>
                                 </tabpanel>
                                 <tabpanel>
                                     <borderlayout height="100%">
                                         <west title="Ingress rules" border="normal" size="33%">
-                                            <div style="background:#B8D335" height="100%">
+                                            <!--<grid id="securityRoleRulesGrid" model="@load(securityVM.clickedNetworkPolicyResult.)" height="100%">
+                                                <rows>
+                                                    <template name="model" var="item">
+                                                        <row style="cursor:pointer">
+                                                            <label value="${item.id}" multiline="true"/>
+                                                            <label value="${item.resourcesAsString}" multiline="true"/>
+                                                            <label value="${item.verbsAsString}" multiline="true"/>
+                                                            <label value="${item.apiGroupsAsString}" multiline="true"/>
+                                                            <label value="${item.resourceNamesAsString}" multiline="true"/>
+                                                            <label value="${item.nonResourceURLsAsString}" multiline="true"/>
+                                                        </row>
+                                                    </template>
+                                                </rows>
+                                                <foot>
+                                                    <footer id="roleRulesGridFooter" span="7" align="right" label="@load(securityVM.roleRulesTotalItems)"/>
+                                                </foot>
+                                            </grid>-->
+                                            <div style="background:#B8D335">
+
                                             </div>
                                         </west>
                                         <center title="Network Policy definition" border="normal">
-                                            <div style="background:#B8D335" height="100%">
+                                            <div style="background:#B8D335">
+
                                             </div>
                                         </center>
                                         <east title="Egress rules" border="normal" size="33%">
-                                            <div style="background:#B8D335" height="100%">
+                                            <div style="background:#B8D335">
                                             </div>
                                         </east>
                                     </borderlayout>

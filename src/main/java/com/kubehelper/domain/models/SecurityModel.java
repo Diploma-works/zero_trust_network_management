@@ -22,6 +22,7 @@ import com.kubehelper.common.KubeHelperException;
 import com.kubehelper.common.Resource;
 import com.kubehelper.domain.filters.RBACFilter;
 import com.kubehelper.domain.filters.RolesSecurityFilter;
+import com.kubehelper.domain.pattern.networking.NetworkPolicyPattern;
 import com.kubehelper.domain.results.ContainerSecurityResult;
 import com.kubehelper.domain.results.NetworkPolicyResult;
 import com.kubehelper.domain.results.PodSecurityContextResult;
@@ -61,6 +62,8 @@ public class SecurityModel implements PageModel {
     private List<ServiceAccountResult> serviceAccountsResults = new ArrayList<>();
     private List<PodSecurityPoliciesResult> podSecurityPoliciesResults = new ArrayList<>();
     private List<NetworkPolicyResult> networkPolicyResults = new ArrayList<>();
+
+    private NetworkPolicyPattern networkPolicyPattern = new NetworkPolicyPattern();
     //key is RoleResult id
     private RolesSecurityFilter rolesFilter = new RolesSecurityFilter();
     private RBACFilter rbacsFilter = new RBACFilter();
@@ -325,5 +328,13 @@ public class SecurityModel implements PageModel {
     public SecurityModel setNetworkPoliciesResults(List<NetworkPolicyResult> networkPoliciesResults) {
         this.networkPolicyResults = networkPoliciesResults;
         return this;
+    }
+
+    public void setNetworkPolicyPattern(NetworkPolicyPattern networkPolicyPattern) {
+        this.networkPolicyPattern = networkPolicyPattern;
+    }
+
+    public NetworkPolicyPattern getNetworkPolicyPattern() {
+        return networkPolicyPattern;
     }
 }
