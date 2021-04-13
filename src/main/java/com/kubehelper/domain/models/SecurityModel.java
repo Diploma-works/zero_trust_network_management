@@ -64,6 +64,7 @@ public class SecurityModel implements PageModel {
     private List<NetworkPolicyResult> networkPolicyResults = new ArrayList<>();
 
     private NetworkPolicyPattern networkPolicyPattern = new NetworkPolicyPattern();
+    private NetworkPolicyResult networkPolicyToDelete;
     //key is RoleResult id
     private RolesSecurityFilter rolesFilter = new RolesSecurityFilter();
     private RBACFilter rbacsFilter = new RBACFilter();
@@ -336,5 +337,13 @@ public class SecurityModel implements PageModel {
 
     public NetworkPolicyPattern getNetworkPolicyPattern() {
         return networkPolicyPattern;
+    }
+
+    public void setNetworkPolicyToDelete(NetworkPolicyResult networkPolicyToDelete) {
+        this.networkPolicyToDelete = networkPolicyToDelete;
+    }
+
+    public NetworkPolicyResult getNetworkPolicyToDelete() {
+        return networkPolicyToDelete;
     }
 }

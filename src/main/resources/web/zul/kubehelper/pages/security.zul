@@ -801,7 +801,7 @@
                                     </columns>
                                     <rows>
                                         <template name="model" var="item">
-                                            <row style="cursor:pointer"><!-- TODO: add  onClick="@command('showNetworkPolicy', clickedItem=item)" -->
+                                            <row style="cursor:pointer" onClick="@command('showNetworkPolicy', clickedItem=item)" >
                                                 <label value="${item.resourceName}"/>
                                                 <label value="${item.namespace}"/>
                                                 <label value="${item.annotationsAsString}"/>
@@ -853,11 +853,6 @@
                                                         <row>
                                                             Pod Selector labels
                                                             <hlayout>
-                                                                <!--<chosenbox hflex="1"
-                                                                           model="@load(securityVM.networkPolicyPattern.podSelectorLabelsString)"
-                                                                           emptyMessage="label name=value"
-                                                                           creatable="true" createMessage="Create label: {0}"
-                                                                           onSearch="@command('newPodSelector', contact=event.value)" />-->
                                                                 <textbox value="@bind(securityVM.networkPolicyPattern.podSelectorLabelsString)"
                                                                          width="200px" tabindex="4" />
                                                             </hlayout>
@@ -960,9 +955,27 @@
                                             </div>
                                         </west>
                                         <center title="Network Policy definition" border="normal">
-                                            <div style="background:#B8D335">
-
-                                            </div>
+                                            <grid>
+                                                <rows>
+                                                    <row>
+                                                        <label value="Name" width="50%" />
+                                                        <label value="@load(securityVM.clickedNetworkPolicyResult.resourceName)" width="50%" />
+                                                    </row>
+                                                    <row>
+                                                        <label value="Namespace" width="50%" />
+                                                        <label value="@load(securityVM.clickedNetworkPolicyResult.namespace)" width="50%" />
+                                                    </row>
+                                                    <row>
+                                                        <label value="Raws" width="50%" />
+                                                        <toolbarbutton label="Raw/Yaml/Json" onClick="@command('showNetworkPolicyFullDefinition', item=securityVM.clickedNetworkPolicyResult)" hflex="1" disabled="${securityVM.clickedNetworkPolicyResult == null}"/>
+                                                    </row>
+                                                    <row>
+                                                        <label value="Actions" width="50%" />
+                                                        <toolbarbutton label="Search connections" width="25%" hflex="1" disabled="${securityVM.clickedNetworkPolicyResult == null}"/> <!-- TODO: add search onClick="@command('showNetworkPolicyFullDefinition', item=securityVM.clickedNetworkPolicyResult)"-->
+                                                        <toolbarbutton label="Delete" onClick="@command('deleteNetworkPolicy', item=securityVM.clickedNetworkPolicyResult)" width="25%" hflex="1" disabled="${securityVM.clickedNetworkPolicyResult == null}"/>
+                                                    </row>
+                                                </rows>
+                                            </grid>
                                         </center>
                                         <east title="Egress rules" border="normal" size="33%">
                                             <div style="background:#B8D335">

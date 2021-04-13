@@ -546,6 +546,14 @@ public class SecurityService {
         }
     }
 
+    public KubernetesClient getNamespacedClient(String namespace) {
+        if(namespace == null || namespace.isEmpty()) {
+            return fabricClient;
+        } else {
+            return ((DefaultKubernetesClient) fabricClient).inNamespace(namespace);
+        }
+    }
+
     public static NetworkPolicy convertPatternToPolicy(NetworkPolicyPattern pattern) {
         String DESCRIPTION_ANNOTATION = "kubehelper.com/description";
         NetworkPolicyBuilder builder = new NetworkPolicyBuilder();
@@ -635,4 +643,20 @@ public class SecurityService {
         return portsList;
     }
 
+    public void deleteNetworkPolicy(SecurityModel model) {
+        NetworkPolicyResult networkPolicyToDelete = model.getNetworkPolicyToDelete();
+        KubernetesClient client = getNamespacedClient(networkPolicyToDelete.getNamespace());
+
+        client.network()
+                .networkPolicies()
+                .list()
+                .getItems()
+                .stream()
+                .filter(policy -> Objects.equals(policy.getMetadata().getName(), networkPolicyToDelete.getResourceName()))
+                .findFirst()
+                .ifPresentOrElse(
+                        policy -> client.network().networkPolicies().delete(policy),
+                        () -> {}
+                );
+    }
 }

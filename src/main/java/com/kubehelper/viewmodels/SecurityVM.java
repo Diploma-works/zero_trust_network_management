@@ -102,7 +102,7 @@ public class SecurityVM {
     private ListModelList<PodSecurityPoliciesResult> podsSecurityPoliciesResults = new ListModelList<>();
     private ListModelList<NetworkPolicyResult> networkPoliciesResults = new ListModelList<>();
 
-    private NetworkPolicyResult clickedNetworkPolicyResult = new NetworkPolicyResult();
+    private NetworkPolicyResult clickedNetworkPolicyResult;
     private NetworkPolicyPattern networkPolicyPattern = new NetworkPolicyPattern();
 
     private String clickedRoleBindingSubjectsLabel = "";
@@ -585,6 +585,18 @@ public class SecurityVM {
         model.setNetworkPolicyPattern(networkPolicyPattern);
         securityService.createNetworkPolicy(model);
         networkPolicyPattern = new NetworkPolicyPattern();
+        //for errors
+        //showNotificationAndExceptions();
+        getNetworkPolicies();
+    }
+
+    @Command
+    @NotifyChange({"networkPoliciesResults", "networkPoliciesTotalItems"})
+    public void deleteNetworkPolicy(@BindingParam("clickedItem") NetworkPolicyResult item) {
+        logger.info("Policy for delete: " + item);
+        model.setNetworkPolicyToDelete(item);
+        securityService.deleteNetworkPolicy(model);
+        clickedNetworkPolicyResult = null;
         getNetworkPolicies();
     }
 
